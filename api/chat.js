@@ -1,32 +1,33 @@
-export default async function handler(req, res) {
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Método no permitido" });
+const fetch = require("node-fetch"); // Puedes omitir esto si ya tienes Node 18+
+
+module.exports = async (req, res) => {
+  console.log("📡 Iniciando conexión a GPT-3.5...");
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: req.body.message || "Hola GPT" }],
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("❌ Error:", data);
+      return res.status(response.status).json({ error: data });
     }
-  
-    const { prompt } = req.body;
-  
-    if (!prompt) {
-      return res.status(400).json({ error: "Falta el prompt" });
-    }
-  
-    try {
-      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: prompt }]
-        })
-      });
-  
-      const data = await openaiRes.json();
-      return res.status(200).json({ result: data.choices[0].message.content });
-    } catch (error) {
-      console.error("Error al llamar a OpenAI:", error);
-      return res.status(500).json({ error: "Error del servidor" });
-    }
+
+    console.log("✅ Respuesta GPT:", data.choices?.[0]?.message?.content);
+
+    res.status(200).json({ reply: data.choices?.[0]?.message?.content });
+  } catch (error) {
+    console.error("❌ Error al conectar con GPT-3.5:", error);
+    res.status(500).json({ error: "Error al conectar con GPT-3.5" });
   }
-  
+};
