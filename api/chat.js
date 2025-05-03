@@ -1,5 +1,3 @@
-const fetch = require("node-fetch"); // Puedes omitir esto si ya tienes Node 18+
-
 module.exports = async (req, res) => {
   console.log("📡 Iniciando conexión a GPT-3.5...");
 
