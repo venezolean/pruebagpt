@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 // /api/chat.js
 module.exports = async (req, res) => {
   try {
