@@ -1,14 +1,13 @@
+// /api/chat.js
 module.exports = async (req, res) => {
-  console.log("📡 Iniciando conexión a GPT-3.5...");
-
   try {
-    // Parsear el body manualmente si es JSON
+    // Leer y parsear el cuerpo manualmente
     const buffers = [];
     for await (const chunk of req) {
       buffers.push(chunk);
     }
     const bodyString = Buffer.concat(buffers).toString();
-    const body = JSON.parse(bodyString);
+    const body = JSON.parse(bodyString); // <-- AQUÍ OCURRÍA EL ERROR
 
     const userMessage = body.message || "Hola GPT";
 
@@ -31,9 +30,7 @@ module.exports = async (req, res) => {
       return res.status(response.status).json({ error: data });
     }
 
-    console.log("✅ Respuesta GPT:", data.choices?.[0]?.message?.content);
-
-    res.status(200).json({ reply: data.choices?.[0]?.message?.content });
+    res.status(200).json({ text: data.choices?.[0]?.message?.content });
   } catch (error) {
     console.error("❌ Error al conectar con GPT-3.5:", error);
     res.status(500).json({ error: "Error al conectar con GPT-3.5" });
