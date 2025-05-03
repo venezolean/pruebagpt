@@ -2,6 +2,16 @@ module.exports = async (req, res) => {
   console.log("📡 Iniciando conexión a GPT-3.5...");
 
   try {
+    // Parsear el body manualmente si es JSON
+    const buffers = [];
+    for await (const chunk of req) {
+      buffers.push(chunk);
+    }
+    const bodyString = Buffer.concat(buffers).toString();
+    const body = JSON.parse(bodyString);
+
+    const userMessage = body.message || "Hola GPT";
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -10,7 +20,7 @@ module.exports = async (req, res) => {
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: req.body.message || "Hola GPT" }],
+        messages: [{ role: "user", content: userMessage }],
       }),
     });
 
